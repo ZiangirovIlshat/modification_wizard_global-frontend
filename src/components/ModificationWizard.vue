@@ -1,21 +1,24 @@
 <template>
     <div class="modification-wizard">
-        <div class="modification-wizard__filters">
-            <ModificationWizardFilters 
-                :data="products.data"
-                :loading="products.loading"
-                @update:vpiType="handleVpiType"
-                @update:selectedValues="handleSelectedValues"
-            ></ModificationWizardFilters>
-        </div>
-        <div class="modification-wizard__table">
-            <ModificationWizardTable
-                :data="products.data"
-                :loading="products.loading"
-                :vpiType="vpiType"
-                @update:sortedValues="handleSortedValues"
-            ></ModificationWizardTable>
-        </div>
+        <p v-if="!products.loading && products.data.length === 0">Нет данных для отображения</p>
+        <template v-else>
+            <div class="modification-wizard__filters">
+                <ModificationWizardFilters 
+                    :data="products.data"
+                    :loading="products.loading"
+                    @update:vpiType="handleVpiType"
+                    @update:selectedValues="handleSelectedValues"
+                ></ModificationWizardFilters>
+            </div>
+            <div class="modification-wizard__table">
+                <ModificationWizardTable
+                    :data="products.data"
+                    :loading="products.loading"
+                    :vpiType="vpiType"
+                    @update:sortedValues="handleSortedValues"
+                ></ModificationWizardTable>
+            </div>
+        </template>
     </div>
 </template>
 
@@ -67,7 +70,6 @@ export default {
 
         handleVpiType(vpiType) {
             this.vpiType = "ВПИ, " + vpiType;
-            console.log(this.vpiType)
         },
 
         async getData() {
@@ -99,8 +101,8 @@ export default {
         },
     },
 
-    async created() {
-        await this.getData();
+    created() {
+        this.getData();
     },
 
     watch: {

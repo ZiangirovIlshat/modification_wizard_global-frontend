@@ -48,6 +48,8 @@
                         @blur="focusedItem = null"
 
                         v-model="optionsValues[item.key]"
+
+                        @input="interactionWithFilter()"
                     >
                         <option :value="null">Выберите</option>
                         <option 
@@ -183,6 +185,7 @@ export default {
 
                 this.$emit("update:selectedValues", this.selectedValues);
             },
+
             deep: true,
         }
     },  
@@ -320,8 +323,8 @@ export default {
         }
 
         &__selected-value {
-            max-width: 240px;
-            min-width: 240px;
+            max-width: 250px;
+            min-width: 250px;
             min-height: 25px;
             padding: 3px 5px;
             background: #ebebeb;

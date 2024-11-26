@@ -14,7 +14,7 @@
                             heading !== 'Цена с НДС' &&
                             heading !== 'Заказ'"
                     >
-                        <button 
+                        <button
                             :class="{
                                 '_desc' : sortingData['keyName'] === key && sortingData['orderBy'] === 'DESC', 
                                 '_sorted' : sortingData['keyName'] === key
@@ -36,14 +36,14 @@
                         >
 
                             <template v-if="key === 'accessories'">
-                                <button 
+                                <button
                                     class="accessories-btn"
                                     :class="{'_opened' : accessoriesListOpened === product.key0}"
                                     @click="openAccessoriesPanel(product.key0)"
                                 ></button>
                             </template>
 
-                            <template v-if="key === 'buyButton'">
+                            <template v-else-if="key === 'buyButton'">
                                 <template v-if="product['product_info'].length !== 0">
                                     <button class="catr-bnt" v-if="product['product_info'].length !== 0" title="В корзину" @click="addToCart()"></button>
                                 </template>
@@ -52,7 +52,7 @@
                                 </template>                      
                             </template>
 
-                            <template v-if="key === 'price'">
+                            <template v-else-if="key === 'price'">
                                 <span class="modification-wizard__price" v-if="product[key]">
                                     {{
                                         parseFloat(product[key]).toLocaleString(
@@ -79,7 +79,7 @@
                         <td :colspan="Object.keys(preparedKeys).length">
                             <div class="accessories-panel-container">
                                 <ModificationWizardAccessories 
-                                    :data="data.accessories[product.key0]"
+                                    :data="product['accessories']"
                                 ></ModificationWizardAccessories>
                             </div>
                         </td>

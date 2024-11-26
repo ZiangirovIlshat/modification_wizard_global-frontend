@@ -1,19 +1,28 @@
 <template>
     <div class="accessories-panel">
-        <!-- v-if="products.loading"
-        v-else -->
         <div class="accessories-panel__table-preloader" v-if="products.loading">
             <p v-for="item in 5" :key="item"></p>
         </div>
+        <p v-else-if="products.error">Не удалось получить аксессуары для данной модификации</p>
 
         <template v-else>
+            <div class="accessories-panel__tabs">
+                <p
+                    :class="{ '_active' : activeTab === key }" 
+                    v-for="(item, key) in categoriesData"
+                    :key="key"
+
+                    @click="activeTab = key"
+                >{{ key }}</p>
+            </div>
+
             <div class="accessories-panel__headings">
                 <p>Название</p>
                 <p>Описание</p>
                 <p>Цена с НДС</p>
                 <p>Заказ</p>
             </div>
-            <div class="accessories-panel__products" v-for="item in this.products.data" :key="item.name">
+            <div class="accessories-panel__products" v-for="item in this.categoriesData[activeTab]" :key="item.name">
                 <p> {{ item.name }} </p>
                 <p> {{ item.descr ?? "—" }} </p>
                 <p>
@@ -29,6 +38,7 @@
                         )
                     }}
                 </p>
+
                 <p v-if="item.price && item.code"><button  class="catr-bnt" title="В корзину"></button></p>
             </div>
         </template>
@@ -54,26 +64,59 @@
                     data: [],
                 },
 
+                categoriesData: {},
+                activeTab: "",
+
                 url: "https://owen.ru/upl_files/modules/price_getter/get.php?articles=",
             }
         },
 
         methods: {
-            getRequestUrl() {
+            async getData() {
+                if(this.data.length === 0) return;
+
                 let requestUrl = this.url;
 
-                for (let key in this.data) {
-                    const el = this.data[key];
-                    if(el !== '-') requestUrl += (el + ';')
+                let categoryList = {};
+
+                this.data.forEach(el => {
+                    requestUrl += (el.modification + ";");
+
+                    let category = el.category;
+                    if(!category) category = "Дополнительно";
+
+                    if(!categoryList[category]) categoryList[category] = [];
+                    categoryList[category].push(el.modification);
+                });
+
+                categoryList = moveKeyToEnd(categoryList, "Дополнительно");
+
+                await this.requestPrices(requestUrl);
+
+                for(let key in categoryList) {
+                    const modifications = categoryList[key];
+
+                    this.products.data.forEach(el => {
+                        if(modifications.includes(el.name)) {
+                            if(!this.categoriesData[key]) this.categoriesData[key] = [];
+                            this.categoriesData[key].push(el);
+                        }
+                    });
                 }
 
-                return requestUrl;
+
+                this.activeTab = Object.keys(this.categoriesData)[0];
+
+                function moveKeyToEnd(obj, key) {
+                    if (!(key in obj)) return obj;
+
+                    const { [key]: value, ...rest } = obj;
+                    return { ...rest, [key]: value };
+                }
             },
 
-            async getData() {
+            async requestPrices(requestUrl) {
                 this.products.loading = true;
-
-                let requestUrl = this.getRequestUrl();
 
                 let errText = "Что пошло не так, ошибка при запросе";
 
@@ -93,11 +136,15 @@
                 } finally {
                     this.products.loading = false;
                 }
+            },
+
+            getCategoriedData() {
+                console.log(this.products.data)
             }
         },
 
-        created() {
-            this.getData()
+        async created() {
+            await this.getData();
         },
     }
 </script>
@@ -124,6 +171,28 @@
             }
         }
 
+        &__tabs {
+            display: flex;
+            gap: 10px;
+            padding: 0 20px;
+            border-bottom: 1px solid;
+            margin: 20px -10px 10px -10px;
+
+            p {
+                border-top: 1px solid;
+                border-left: 1px solid;
+                border-right: 1px solid;
+                border-radius: 5px 5px 0px 0px;
+                padding: 5px;
+                cursor: pointer;
+
+                &._active {
+                    background: #4c4c4c;
+                    color: #fff;
+                }
+            }
+        }
+
         &__headings {
             display: flex;
             justify-content: space-between;
@@ -137,6 +206,7 @@
         &__products {
             display: flex;
             justify-content: space-between;
+            align-items: center;
             border-bottom: 1px solid #dfdfdf;
 
             &:hover {
