@@ -28,14 +28,22 @@
 
             <tbody>
                 <template v-for="product in data.products">
-                    <tr v-if="product" :key="product.key0">
+                    <tr :class="{'_opened' : accessoriesListOpened === product.key0}" v-if="product" :key="product.key0">
                         <td
                             :class="{'text-center' : key !== 'key0' }"
                             v-for="(heading, key) in preparedKeys"
                             :key="key" 
                         >
+                            <template v-if="key === 'key0'">
+                                <a 
+                                    class="modification-wizard__modification-link" 
+                                    :href="product['link']" 
+                                    target="_blank"
+                                    title="На страницу товара"
+                                >{{ product[key] }}</a>
+                            </template>
 
-                            <template v-if="key === 'accessories'">
+                            <template v-else-if="key === 'accessories'">
                                 <button
                                     class="accessories-btn"
                                     :class="{'_opened' : accessoriesListOpened === product.key0}"
@@ -71,7 +79,11 @@
                             </template>
 
                             <template v-else>
-                                {{ product[key] }}
+                                {{
+                                    isNaN(product[key])
+                                    ? product[key]
+                                    : new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 10 }).format(product[key])
+                                }}
                             </template>
                         </td>
                     </tr>
@@ -158,11 +170,11 @@
 
                 if(!keyName || keyName !== key) {
                     keyName = key;
-                    orderBy = "DESC";
+                    orderBy = "ASC";
  
                 } else {
-                    if(orderBy === "DESC") {
-                        orderBy = "ASC";
+                    if(orderBy === "ASC") {
+                        orderBy = "DESC";
                     } else {
                         keyName = "";
                         orderBy = "";
@@ -208,10 +220,10 @@
 
         &__table-preloader {
             p {
-                margin: 0 0 20px 0;
+                margin: 0 0 5px 0;
                 display: flex;
                 justify-content: space-between;
-                height: 30px;
+                height: 40px;
                 width: 100%;
                 background: #ededed;
             }
@@ -220,6 +232,15 @@
                 p:nth-child(#{$i}) {
                     opacity: calc(1 - #{$i * 0.13});
                 }
+            }
+        }
+
+        &__modification-link {
+            color: inherit;
+            text-decoration: none;
+
+            &:hover {
+                color: #008f86;
             }
         }
 
@@ -249,6 +270,16 @@
 
         &.accessories-tr {
             border-top: none;
+        }
+
+        &._opened {
+            &:hover {
+                border-bottom: none;
+            }
+        }
+
+        &:hover {
+            border-bottom: 1px solid #b8b8b8;
         }
     }
 
@@ -317,7 +348,8 @@
         background: inherit;
         border: none;
         height: 20px;
-        width: 20px;
+        width: 15px;
+        padding: 0 5px;
         font-weight: 600;
         transition: .2s;
         position: relative;
@@ -334,10 +366,12 @@
             transition: left .2s;
         }
 
-        &:hover {
-            &::after {
-                top: 60%;
-                border-top: 10px solid #9f0412;
+        @media (hover: hover) and (pointer: fine) {
+            &:hover {
+                &::after {
+                    top: 60%;
+                    border-top: 10px solid #9f0412;
+                }
             }
         }
 
@@ -345,6 +379,7 @@
             &::after {
                 rotate: 180deg;
                 top: 30%;
+                border-top: 10px solid #9f0412;
             }
 
             &:hover {

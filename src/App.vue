@@ -27,7 +27,7 @@
   margin: 0 auto;
 }
 .catr-bnt {
-  background: url(sprite.css-fa95ae05.svg) no-repeat;
+  background: url(https://owen.ru/upl_files/modules/modification_wizard_global/frontend/sprite.css-fa95ae05.svg) no-repeat;
   background-position: 42.74193548387097% 78.75%;
   border: none;
   width: 25px;

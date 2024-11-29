@@ -37,7 +37,8 @@ export default {
 
     data() {
         return {
-            requestUrl: "http://localhost/modification_wizard_global_new/backend/getData.php",
+            // requestUrl: "http://localhost/modification_wizard_global_new/backend/getData.php",
+            requestUrl: "https://owen.ru/upl_files/modules/modification_wizard_global/backend/getData.php",
 
             requestData: {
                 "category": "",

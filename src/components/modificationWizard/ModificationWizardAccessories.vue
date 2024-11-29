@@ -174,20 +174,15 @@
         &__tabs {
             display: flex;
             gap: 10px;
-            padding: 0 20px;
-            border-bottom: 1px solid;
-            margin: 20px -10px 10px -10px;
+            margin: 20px 0 10px 0;
 
             p {
-                border-top: 1px solid;
-                border-left: 1px solid;
-                border-right: 1px solid;
-                border-radius: 5px 5px 0px 0px;
-                padding: 5px;
+                padding: 10px 20px;
+                background: #ededed;
                 cursor: pointer;
 
-                &._active {
-                    background: #4c4c4c;
+                &:hover, &._active  {
+                    background: #9b9b9b;
                     color: #fff;
                 }
             }
@@ -197,6 +192,7 @@
             display: flex;
             justify-content: space-between;
             padding: 5px 0;
+            border-bottom: 1px solid;
 
             p {
                 font-weight: 600;

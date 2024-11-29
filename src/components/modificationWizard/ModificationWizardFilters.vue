@@ -56,7 +56,13 @@
                             :value="option"
                             :key="option"
                             v-for="option in item.values"
-                        >{{ option }}</option>
+                        >
+                            {{
+                                isNaN(option)
+                                ? option
+                                : new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 10 }).format(option)
+                            }}
+                        </option>
                     </select>
                 </div>
 
@@ -203,12 +209,18 @@ export default {
             flex-wrap: wrap;
             margin: 0 0 20px 0;
             padding: 10px;
+
+            @media (max-width: 768px) {
+                padding: 5px;
+                margin: 0 0 10px 0;
+            }
         }
 
         &__head-row {
             margin: 0 0 30px 0;
             display: flex;
             justify-content: space-between;
+            flex-wrap: wrap;
             align-items: start;
 
             button {
@@ -218,6 +230,13 @@ export default {
                 background-color: #fff;
                 border: none;
                 box-shadow: 0px 0px 15px 0px rgba(0, 0, 0, 0.11);
+
+                @media (max-width: 768px) {
+                    order: 0;
+                    margin: 0 0 20px 0;
+                    width: 100%;
+                    height: 30px;
+                }
             }
         }
 
@@ -226,6 +245,10 @@ export default {
             justify-content: space-between;
             flex-wrap: wrap;
             gap: 25px;
+
+            @media (max-width: 768px) {
+                gap: 10px;
+            }
         }
     }
 
@@ -239,11 +262,19 @@ export default {
             font-weight: 600;
             margin: 0 0 0 5px;
         }
+
+        @media (max-width: 768px) {
+            padding: 3px;
+            font-size: 12px;
+            background: #fff;
+            border-radius: 3px;
+        }
     }
 
     .filter-item {
         display: flex;
         flex: 0 0 30%;
+        min-width: 330px;
         justify-content: space-between;
         align-items: start;
         gap: 20px;
@@ -251,9 +282,22 @@ export default {
 
         cursor: pointer;
 
+        @media (max-width: 1110px) {
+            flex: 0 0 48%;
+        }
+
+        @media (max-width: 768px) {
+            flex: 0 0 100%;
+            flex-wrap: wrap;
+            gap: 0;
+            margin: 0 0 10px 0;
+            min-width: auto;
+        }
+
         label {
             line-height: 25px;
         }
+
 
         select {
             width: 250px;
@@ -279,6 +323,14 @@ export default {
                 transition: .2s;
                 background: #00a398;
                 cursor: default;
+            }
+
+            @media (max-width: 1330px) {
+                width: 200px;
+            }
+
+            @media (max-width: 768px) {
+                width: 100%;
             }
         }
 
@@ -307,10 +359,17 @@ export default {
             &._focused::after {
                 border-color: #333 transparent transparent transparent;
             }
+
+            @media (max-width: 768px) {
+                flex: 0 0 100%;
+            }
         }
 
         &.vpi-type {
             width: 30%;
+            @media (max-width: 768px) {
+                order: 1;
+            }
 
             &__select-container {
                 border-color: #333 transparent transparent transparent;
@@ -328,6 +387,16 @@ export default {
             min-height: 25px;
             padding: 3px 5px;
             background: #ebebeb;
+
+            @media (max-width: 1330px) {
+                max-width: 200px;
+                min-width: 200px;
+            }
+
+            @media (max-width: 768px) {
+                max-width: 100%;
+                min-width: 100%;
+            }
         }
     }
 
