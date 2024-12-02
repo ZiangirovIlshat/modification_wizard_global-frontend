@@ -61,7 +61,13 @@
                             </template>
 
                             <template v-else-if="key === 'price'">
-                                <span class="modification-wizard__price" v-if="product[key]">
+                                <CartButton
+                                    v-if="product['product_info'].length !== 0"
+                                    :price="product['product_info'][0]['price']"
+                                    :code="product['product_info'][0]['code']"
+                                />
+
+                                <!-- <span class="modification-wizard__price" v-if="product[key]">
                                     {{
                                         parseFloat(product[key]).toLocaleString(
                                             "ru-RU",
@@ -73,7 +79,7 @@
                                             }
                                         )
                                     }}
-                                </span>
+                                </span> -->
 
                                 <span v-else>по запросу</span>
                             </template>
@@ -104,12 +110,14 @@
 
 <script>
     import ModificationWizardAccessories from "./ModificationWizardAccessories.vue";
+    import CartButton from "../CartButton.vue";
 
     export default {
         name : "ModificationWizardTable",
 
         components: {
-            ModificationWizardAccessories
+            ModificationWizardAccessories,
+            CartButton,
         },
 
         props: {
