@@ -48,8 +48,6 @@
                         @blur="focusedItem = null"
 
                         v-model="optionsValues[item.key]"
-
-                        @input="interactionWithFilter()"
                     >
                         <option :value="null">Выберите</option>
                         <option 
@@ -229,13 +227,19 @@ export default {
                 height: 40px;
                 background-color: #fff;
                 border: none;
-                box-shadow: 0px 0px 15px 0px rgba(0, 0, 0, 0.11);
+                box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.2);
 
                 @media (max-width: 768px) {
                     order: 0;
                     margin: 0 0 20px 0;
                     width: 100%;
                     height: 30px;
+                }
+
+                @media (hover: hover) and (pointer: fine) {
+                    &:hover {
+                        box-shadow: 5px 5px 15px 0px rgba(0, 0, 0, 0.11);
+                    }
                 }
             }
         }

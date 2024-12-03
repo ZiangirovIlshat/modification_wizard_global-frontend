@@ -19,33 +19,24 @@
             <div class="accessories-panel__headings">
                 <p>Название</p>
                 <p>Описание</p>
-                <p>Цена с НДС</p>
                 <p>Заказ</p>
             </div>
             <div class="accessories-panel__products" v-for="item in this.categoriesData[activeTab]" :key="item.name">
                 <p> {{ item.name }} </p>
                 <p> {{ item.descr ?? "—" }} </p>
-                <p>
-                    {{
-                        parseFloat(item.price).toLocaleString(
-                            "ru-RU",
-                            {
-                                style: "currency",
-                                currency: "RUB",
-                                minimumFractionDigits: 2,
-                                maximumFractionDigits: 2,
-                            }
-                        )
-                    }}
-                </p>
-
-                <p v-if="item.price && item.code"><button  class="catr-bnt" title="В корзину"></button></p>
+                <CartButton
+                    v-if="item.code"
+                    :price="item.price"
+                    :code="item.code"
+                />
             </div>
         </template>
     </div>
 </template>
 
 <script>
+    import CartButton from "../CartButton.vue";
+
     export default {
         name: "ModificationWizardAccessories",
 
@@ -54,6 +45,10 @@
                 type: Object,
                 required: true,
             }
+        },
+
+        components: {
+            CartButton 
         },
 
         data() {
@@ -151,10 +146,11 @@
 
 <style lang="scss" scoped>
     .accessories-panel {
-        background: #f9f9f9;
-        border-radius: 5px;
-        padding: 10px 10px 30px 10px;
+        background: #f5f4f4;
+        border-radius: 15px;
+        padding: 20px 20px 30px 20px;
         margin: 0 0 10px 0;
+        box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.2);
 
         &__table-preloader {
             p {
@@ -178,11 +174,12 @@
 
             p {
                 padding: 10px 20px;
-                background: #ededed;
+                background: #ffffff;
+                color: #707070;
                 cursor: pointer;
 
                 &:hover, &._active  {
-                    background: #9b9b9b;
+                    background: #7e7e7e;
                     color: #fff;
                 }
             }
@@ -204,6 +201,7 @@
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid #dfdfdf;
+            margin: 5px 0 10px 0;
 
             &:hover {
                 border-bottom: 1px solid #b8b8b8;
@@ -224,18 +222,14 @@
             }
 
             p:first-child {
-               width: 250px;
+               width: 200px;
             }
             p:nth-child(2) {
                 flex: 1;
             }
             p:nth-child(3) {
                 text-align: center;
-                width: 85px;
-            }
-            p:nth-child(4) {
-                text-align: center;
-                width: 50px;
+                width: 150px;
             }
         }
     }

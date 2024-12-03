@@ -6,7 +6,7 @@
 
         <table v-else>
             <thead>
-                <th v-for="(heading, key) in preparedKeys" :key="key">
+                <th v-for="(heading, key) in preparedKeys" :key="key" :class="{'_sorted' : sortingData['keyName'] === key}">
                     <template 
                         v-if="
                             heading !== 'Модификация' &&
@@ -27,8 +27,8 @@
             </thead>
 
             <tbody>
-                <template v-for="product in data.products">
-                    <tr :class="{'_opened' : accessoriesListOpened === product.key0}" v-if="product" :key="product.key0">
+                <template v-for="(product, index) in data.products">
+                    <tr :class="{'_opened' : accessoriesListOpened === product.key0}" v-if="product && index < limit" :key="product.key0">
                         <td
                             :class="{'text-center' : key !== 'key0' }"
                             v-for="(heading, key) in preparedKeys"
@@ -52,36 +52,13 @@
                             </template>
 
                             <template v-else-if="key === 'buyButton'">
-                                <template v-if="product['product_info'].length !== 0">
-                                    <button class="catr-bnt" v-if="product['product_info'].length !== 0" title="В корзину" @click="addToCart()"></button>
-                                </template>
-                                <template v-else>
-                                    —
-                                </template>                      
-                            </template>
-
-                            <template v-else-if="key === 'price'">
                                 <CartButton
                                     v-if="product['product_info'].length !== 0"
                                     :price="product['product_info'][0]['price']"
                                     :code="product['product_info'][0]['code']"
                                 />
 
-                                <!-- <span class="modification-wizard__price" v-if="product[key]">
-                                    {{
-                                        parseFloat(product[key]).toLocaleString(
-                                            "ru-RU",
-                                            {
-                                                style: "currency",
-                                                currency: "RUB",
-                                                minimumFractionDigits: 2,
-                                                maximumFractionDigits: 2,
-                                            }
-                                        )
-                                    }}
-                                </span> -->
-
-                                <span v-else>по запросу</span>
+                                <span v-else>по запросу</span>                  
                             </template>
 
                             <template v-else>
@@ -105,6 +82,28 @@
                 </template>
             </tbody>
         </table>
+
+        <div class="modification-wizard__btns" v-if="data.products && !loading">
+            <div class="modification-wizard__btns-row">
+                <button 
+                    class="modification-wizard__show-btn"
+                    @click="limit +=20"
+                    v-if="data.products.length > 20 && data.products.length > limit"
+                >Показать еще 20</button>
+                <button 
+                    class="modification-wizard__show-btn" 
+                    @click="limit = data.products.length"
+                    v-if="limit < data.products.length"
+                >Показать все ({{ data.products.length - limit }})</button>
+            </div>
+
+
+            <button 
+                class="modification-wizard__close-btn"
+                @click="limit=10"
+                v-if="limit > 10 && data.products.length !== 10"
+            >Свернуть</button>
+        </div>
     </div>
 </template>
 
@@ -125,15 +124,13 @@
                 type: Object,
                 required: true,
             },
-
             loading: {
                 type: Boolean,
                 default: true,
             },
-
             vpiType: {
                 type: String,
-            }
+            },
         },
 
         data() {
@@ -147,6 +144,7 @@
                 },
 
                 accessoriesListOpened: "",
+                limit: 10,
             }
         },
 
@@ -160,7 +158,6 @@
                     if(i === 1) this.preparedKeys["accessories"] = "Аксессуары";
 
                     if(i === this.data.keys.length - 1) {
-                        this.preparedKeys["price"] = "Цена с НДС";
                         this.preparedKeys["buyButton"] = "Заказ";
                     }
 
@@ -255,13 +252,65 @@
         &__price {
             font-weight: 600;
         }
+
+        &__btns-row {
+            margin: 30px 0 10px 0;
+            display: flex;
+            gap: 10px;
+        }
+        &__show-btn, &__close-btn {
+            color: #fff;
+            border: none;
+            padding: 5px 15px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        &__show-btn {
+            background-color: #008f86;
+
+            @media (hover: hover) and (pointer: fine) {
+                &:hover {
+                    background: #fff;
+                    outline: 1px solid #008f86;
+                    color: #008f86;
+                }
+            }
+        }
+
+        &__close-btn {
+            background: #4c4c4c;
+            padding-right: 30px;
+            position: relative;
+            
+            @media (hover: hover) and (pointer: fine) {
+                &:hover {
+                    background: #fff;
+                    outline: 1px solid #4c4c4c;
+                    color: #4c4c4c;
+
+                    &::after {
+                        border-bottom: 8px solid #4c4c4c;
+                    }
+                }
+            }
+
+            &::after {
+                content: "";
+                position: absolute;
+                top: 4px;
+                right: 10px;
+                border: 5px solid transparent;
+                border-bottom: 8px solid #fff;
+            }
+        }
     }
 
     table {
         font-size: 12px;
         color: #4c4c4c;
         width: 100%;
-        border-bottom: 1px solid #ddd;
+        border: 1px solid #ddd;
     }
 
     thead {
@@ -305,6 +354,10 @@
 
         &:first-child {
             text-align: left;
+        }
+
+        &._sorted {
+            color: #008f86;
         }
 
         button {

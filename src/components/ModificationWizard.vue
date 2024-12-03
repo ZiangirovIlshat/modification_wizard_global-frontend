@@ -37,8 +37,8 @@ export default {
 
     data() {
         return {
-            requestUrl: "http://localhost/modification_wizard_global_new/backend/getData.php",
-            // requestUrl: "https://owen.ru/upl_files/modules/modification_wizard_global/backend/getData.php",
+            // requestUrl: "http://localhost/modification_wizard_global_new/backend/getData.php",
+            requestUrl: "https://owen.ru/upl_files/modules/modification_wizard_global/backend/getData.php",
 
             requestData: {
                 "category": "",
@@ -56,6 +56,7 @@ export default {
             },
 
             vpiType: "ВПИ, МПа",
+            limit: 5,
         }
     },
 
@@ -71,6 +72,10 @@ export default {
 
         handleVpiType(vpiType) {
             this.vpiType = "ВПИ, " + vpiType;
+        },
+
+        handleClearFilters() {
+
         },
 
         async getData() {
@@ -119,14 +124,16 @@ export default {
 </script>
   
 <style scoped lang="scss">
-    // .modification-wizard {
+    .modification-wizard {
+        padding: 20px 0;
 
-    // }
-    .modification-wizard__filters {
-        background-color: #f9f9f9;
-        padding: 20px;
-        border-radius: 15px;
-        margin: 0 0 20px 0;
+        &__filters {
+            background-color: #f5f4f4;
+            box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 0 0 20px 0;
+        }
     }
 </style>
   
