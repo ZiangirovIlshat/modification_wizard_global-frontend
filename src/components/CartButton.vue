@@ -1,11 +1,11 @@
 <template>
-    <div class="cart">
-        <p class="cart__preloader" v-if="loading">Загрузка...</p>
-        <p class="cart__error" v-else-if="error">{{ cart.error }}</p>
-        <div class="cart__row" v-else>
-            <div class="cart__price" :class="{'_in-cart' : count > 0}">
+    <div class="cart-btn">
+        <p class="cart-btn__preloader" v-if="loading">Загрузка...</p>
+        <p class="cart-btn__error" v-else-if="error">{{ cart.error }}</p>
+        <div class="cart-btn__row" v-else>
+            <div class="cart-btn__price" :class="{'_in-cart' : count > 0}">
                 {{
-                    parseFloat(count > 0 ? price * count : price).toLocaleString(
+                    parseFloat(price).toLocaleString(
                         "ru-RU",
                         {
                             style: "currency",
@@ -16,18 +16,14 @@
                     )
                 }}
             </div>
-            <div class="cart__btns">
-                <button 
-                    class="cart__bue-btn" 
-                    @click="count === 0 ? count = 1 : '', addToCart()"
-                    v-if="count === 0"
+            <div class="cart-btn__btns">
+                <button
+                    class="cart-btn__bue-btn"
+                    @click="callAddToCart()"
+                    v-if="!isInCart"
                 >В заказ</button>
 
-                <div class="cart__get-count-btns" v-else>
-                    <button @click="count !== 0 ? count-- : '',  addToCart()">-</button>
-                    {{ count }}
-                    <button @click="count++, addToCart()">+</button>
-                </div>
+                <p class="cart-btn__is-in-cart" v-else>В корзине</p>
             </div>
         </div>
     </div>
@@ -56,7 +52,9 @@ export default {
             loading: "",
             error: "",
 
-            count: 0,
+            isInCart: false,
+
+            count: 1,
         }
     },
 
@@ -68,26 +66,60 @@ export default {
 
     methods: {
         ...mapActions({
-            fetchCartData: "cart/fetchCartData",
+            addToCart: "cart/addToCart",
+            setCount: "cart/setCount",
         }),
 
-        async addToCart() {
+        async callAddToCart() {
             try {
                 this.loading = true;
 
-                await this.fetchCartData({ code: this.code, count: this.count });
+                await this.addToCart({ code: this.code, count: this.count });
+                this.checkInCart();
             } catch (error) {
                 this.error = this.cart.error;
             } finally {
                 this.loading = false;
             }
         },
-    }
+
+        async callSetCount() {
+            try {
+                this.loading = true;
+
+                await this.setCount({ code: this.code, count: this.count });
+            } catch (error) {
+                this.error = this.cart.error;
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        checkInCart() {
+            const data = this.cart.data;
+
+            if(data.total === 0) {
+                this.isInCart = false;
+                return;
+            }
+
+            for (let i = 0; i < data.items.length; i++) {
+                const el = data.items[i];
+                
+                if(el.id == this.code) {
+                    this.isInCart = true;
+                    return;
+                }
+            }
+
+            this.isInCart = false;
+        }
+    },
 }
 </script>
 
 <style lang="scss" scoped>
-.cart {
+.cart-btn {
     width: 150px;
 
     &._in-cart {
@@ -119,7 +151,7 @@ export default {
     }
 
     &__bue-btn {
-        width: 60px;
+        width: 70px;
         padding: 2px 0;
         background-color: #4c4c4c;
         border: none;
@@ -133,6 +165,14 @@ export default {
                 color: #4c4c4c;
             }
         }
+    }
+
+    &__is-in-cart {
+        width: 65px;
+        text-align: center;
+        font-weight: normal;
+        padding: 2px;
+        border: 1px solid #4c4c4c;
     }
 
     &__get-count-btns {

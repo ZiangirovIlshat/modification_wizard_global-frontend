@@ -1,23 +1,27 @@
 <template>
     <div class="modification-wizard">
         <p v-if="!products.loading && products.data.length === 0">Нет данных для отображения</p>
+        <p v-else-if="products.error" v-html="products.error"></p>
         <template v-else>
             <div class="modification-wizard__filters">
                 <ModificationWizardFilters 
                     :data="products.data"
                     :loading="products.loading"
-                    @update:vpiType="handleVpiType"
                     @update:selectedValues="handleSelectedValues"
-                ></ModificationWizardFilters>
+                />
             </div>
             <div class="modification-wizard__table">
                 <ModificationWizardTable
                     :data="products.data"
                     :loading="products.loading"
-                    :vpiType="vpiType"
                     @update:sortedValues="handleSortedValues"
-                ></ModificationWizardTable>
+                />
             </div>
+
+            <SetLimitBtns
+                v-if="!products.loading"
+                :rowsCount="products.data.products.length"
+            />
         </template>
     </div>
 </template>
@@ -26,6 +30,7 @@
 
 import ModificationWizardFilters from "./modificationWizard/ModificationWizardFilters.vue";
 import ModificationWizardTable from "./modificationWizard/ModificationWizardTable.vue";
+import SetLimitBtns from "./modificationWizard/SetLimitBtns.vue";
 
 export default {
     name: "ModificationWizard",
@@ -33,12 +38,13 @@ export default {
     components: {
         ModificationWizardFilters,
         ModificationWizardTable,
+        SetLimitBtns,
     },
 
     data() {
         return {
-            // requestUrl: "http://localhost/modification_wizard_global_new/backend/getData.php",
-            requestUrl: "https://owen.ru/upl_files/modules/modification_wizard_global/backend/getData.php",
+            requestUrl: "http://localhost/modification_wizard_global_new/backend/getData.php",
+            // requestUrl: "https://owen.ru/upl_files/modules/modification_wizard_global/backend/getData.php",
 
             requestData: {
                 "category": "",
@@ -54,9 +60,6 @@ export default {
                 error: "",
                 data: {},
             },
-
-            vpiType: "ВПИ, МПа",
-            limit: 5,
         }
     },
 
@@ -70,12 +73,9 @@ export default {
             this.requestData.sorting["orderBy"] = sortedValues["orderBy"];
         },
 
-        handleVpiType(vpiType) {
-            this.vpiType = "ВПИ, " + vpiType;
-        },
-
         handleClearFilters() {
-
+            console.log(this.filtersIsEmpty)
+            this.filtersIsEmpty = true;
         },
 
         async getData() {
@@ -124,6 +124,10 @@ export default {
 </script>
   
 <style scoped lang="scss">
+    b {
+        font-weight: 600;
+    }
+
     .modification-wizard {
         padding: 20px 0;
 

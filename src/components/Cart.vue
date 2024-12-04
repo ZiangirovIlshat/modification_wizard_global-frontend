@@ -14,21 +14,21 @@ import { mapState, mapActions } from "vuex";
 export default {
     name: "Cart",
 
-    data() {
-        return {
-
-        }
-    },
-
     computed: {
         ...mapState({
             cart: (state) => state.cart,
         }),
-
-        getCount() {
-            this.cart
-        },
     },
+
+    methods: {
+        ...mapActions({
+            getCart: "cart/getCart",
+        }),
+    },
+
+    created() {
+        this.getCart();
+    }
 }
 
 </script>
@@ -61,8 +61,8 @@ export default {
 
         &__count {
             position: absolute;
-            top: 10px;
-            right: 10px;
+            top: 4px;
+            right: 4px;
             background-color: #9f0412;
             width: 20px;
             height: 20px;

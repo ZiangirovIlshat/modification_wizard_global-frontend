@@ -7,7 +7,7 @@
         <table v-else>
             <thead>
                 <th v-for="(heading, key) in preparedKeys" :key="key" :class="{'_sorted' : sortingData['keyName'] === key}">
-                    <template 
+                    <template
                         v-if="
                             heading !== 'Модификация' &&
                             heading !== 'Аксессуары' &&
@@ -28,7 +28,7 @@
 
             <tbody>
                 <template v-for="(product, index) in data.products">
-                    <tr :class="{'_opened' : accessoriesListOpened === product.key0}" v-if="product && index < limit" :key="product.key0">
+                    <tr :class="{'_opened' : accessoriesListOpened === product.key0}" v-if="product && index < limit.value" :key="product.key0">
                         <td
                             :class="{'text-center' : key !== 'key0' }"
                             v-for="(heading, key) in preparedKeys"
@@ -83,141 +83,131 @@
             </tbody>
         </table>
 
-        <div class="modification-wizard__btns" v-if="data.products && !loading">
-            <div class="modification-wizard__btns-row">
-                <button 
-                    class="modification-wizard__show-btn"
-                    @click="limit +=20"
-                    v-if="data.products.length > 20 && data.products.length > limit"
-                >Показать еще 20</button>
-                <button 
-                    class="modification-wizard__show-btn" 
-                    @click="limit = data.products.length"
-                    v-if="limit < data.products.length"
-                >Показать все ({{ data.products.length - limit }})</button>
-            </div>
-
-
-            <button 
-                class="modification-wizard__close-btn"
-                @click="limit=10"
-                v-if="limit > 10 && data.products.length !== 10"
-            >Свернуть</button>
-        </div>
+        
     </div>
 </template>
 
 <script>
-    import ModificationWizardAccessories from "./ModificationWizardAccessories.vue";
-    import CartButton from "../CartButton.vue";
+import { mapState, mapActions } from "vuex";
+import ModificationWizardAccessories from "./ModificationWizardAccessories.vue";
+import CartButton from "../CartButton.vue";
 
-    export default {
-        name : "ModificationWizardTable",
+export default {
+    name : "ModificationWizardTable",
 
-        components: {
-            ModificationWizardAccessories,
-            CartButton,
+    components: {
+        ModificationWizardAccessories,
+        CartButton,
+    },
+
+    props: {
+        data: {
+            type: Object,
+            required: true,
         },
-
-        props: {
-            data: {
-                type: Object,
-                required: true,
-            },
-            loading: {
-                type: Boolean,
-                default: true,
-            },
-            vpiType: {
-                type: String,
-            },
+        loading: {
+            type: Boolean,
+            default: true,
         },
+    },
 
-        data() {
-            return {
-                unnecessaryData: [ "Статус товара", "Особенности серии", "price", "code" ],
+    data() {
+        return {
+            unnecessaryData: [ "Статус товара", "Особенности серии", "price", "code" ],
 
-                preparedKeys: {},
-                sortingData: {
-                    "keyName" : "",
-                    "orderBy" : "ASC",
-                },
-
-                accessoriesListOpened: "",
-                limit: 10,
-            }
-        },
-
-        methods: {
-            getPreparedData() {
-                this.preparedKeys = {};
-
-                for (let i = 0; i < this.data.keys.length; i++) {
-                    const el = this.data.keys[i];
-
-                    if(i === 1) this.preparedKeys["accessories"] = "Аксессуары";
-
-                    if(i === this.data.keys.length - 1) {
-                        this.preparedKeys["buyButton"] = "Заказ";
-                    }
-
-                    if(this.unnecessaryData.includes(el)) continue;
-
-                    if(el.indexOf("ВПИ, ") !== -1 && el !== this.vpiType) continue;
-
-                    this.preparedKeys["key" + i] = el;
-                }
+            preparedKeys: {},
+            sortingData: {
+                "keyName" : "",
+                "orderBy" : "ASC",
             },
 
-            updateSortingValues(key) {
-                let keyName = this.sortingData["keyName"];
-                let orderBy = this.sortingData["orderBy"];
-
-                if(!keyName || keyName !== key) {
-                    keyName = key;
-                    orderBy = "ASC";
- 
-                } else {
-                    if(orderBy === "ASC") {
-                        orderBy = "DESC";
-                    } else {
-                        keyName = "";
-                        orderBy = "";
-                    }
-                }
-
-                this.sortingData["keyName"] = keyName;
-                this.sortingData["orderBy"] = orderBy;
-
-                this.$emit("update:sortedValues", this.sortingData);
-            },
-
-            openAccessoriesPanel(productKey) {
-                if(this.accessoriesListOpened === productKey) {
-                    this.accessoriesListOpened = null;
-                    return;
-                }
-
-                this.accessoriesListOpened = productKey;
-            },
-        },
-
-        watch: {
-            data: {
-                handler(newData) {
-                    if(Object.keys(newData).length !== 0) this.getPreparedData();
-                },
-
-                deep: true,
-            },
-
-            vpiType: {
-                handler() {
-                    this.getPreparedData();
-                }
-            }
+            accessoriesListOpened: "",
         }
+    },
+
+    computed: {
+        ...mapState({
+            limit: (state) => state.limit,
+            vpiType: (state) => state.vpiType,
+        }),
+    },
+
+    methods: {
+        ...mapActions({
+            updateLimit: "updateLimit",
+        }),
+
+        getPreparedData() {
+            this.preparedKeys = {};
+
+            for (let i = 0; i < this.data.keys.length; i++) {
+                const el = this.data.keys[i];
+
+                if(i === 1) this.preparedKeys["accessories"] = "Аксессуары";
+
+                if(i === this.data.keys.length - 1) {
+                    this.preparedKeys["buyButton"] = "Заказ";
+                }
+
+                if(this.unnecessaryData.includes(el)) continue;
+
+                if(el.indexOf("ВПИ, ") !== -1 && el !== this.vpiType.value) continue;
+
+                this.preparedKeys["key" + i] = el;
+            }
+        },
+
+        updateSortingValues(key) {
+            let keyName = this.sortingData["keyName"];
+            let orderBy = this.sortingData["orderBy"];
+
+            if(!keyName || keyName !== key) {
+                keyName = key;
+                orderBy = "ASC";
+ 
+            } else {
+                if(orderBy === "ASC") {
+                    orderBy = "DESC";
+                } else {
+                    keyName = "";
+                    orderBy = "";
+                }
+            }
+
+            this.sortingData["keyName"] = keyName;
+            this.sortingData["orderBy"] = orderBy;
+
+            this.$emit("update:sortedValues", this.sortingData);
+        },
+
+        openAccessoriesPanel(productKey) {
+            if(this.accessoriesListOpened === productKey) {
+                this.accessoriesListOpened = null;
+                return;
+            }
+
+            this.accessoriesListOpened = productKey;
+        },
+    },
+
+    watch: {
+        data: {
+            handler(newData) {
+                if(Object.keys(newData).length !== 0) this.getPreparedData();
+            },
+
+            deep: true,
+        },
+
+        vpiType: {
+            handler() {
+                this.getPreparedData();
+            },
+
+            deep: true,
+        },
     }
+}
 </script>
 
 <style lang="scss" scoped>
@@ -251,58 +241,6 @@
 
         &__price {
             font-weight: 600;
-        }
-
-        &__btns-row {
-            margin: 30px 0 10px 0;
-            display: flex;
-            gap: 10px;
-        }
-        &__show-btn, &__close-btn {
-            color: #fff;
-            border: none;
-            padding: 5px 15px;
-            cursor: pointer;
-            font-weight: 600;
-        }
-
-        &__show-btn {
-            background-color: #008f86;
-
-            @media (hover: hover) and (pointer: fine) {
-                &:hover {
-                    background: #fff;
-                    outline: 1px solid #008f86;
-                    color: #008f86;
-                }
-            }
-        }
-
-        &__close-btn {
-            background: #4c4c4c;
-            padding-right: 30px;
-            position: relative;
-            
-            @media (hover: hover) and (pointer: fine) {
-                &:hover {
-                    background: #fff;
-                    outline: 1px solid #4c4c4c;
-                    color: #4c4c4c;
-
-                    &::after {
-                        border-bottom: 8px solid #4c4c4c;
-                    }
-                }
-            }
-
-            &::after {
-                content: "";
-                position: absolute;
-                top: 4px;
-                right: 10px;
-                border: 5px solid transparent;
-                border-bottom: 8px solid #fff;
-            }
         }
     }
 

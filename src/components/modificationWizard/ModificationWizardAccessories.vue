@@ -132,10 +132,6 @@
                     this.products.loading = false;
                 }
             },
-
-            getCategoriedData() {
-                console.log(this.products.data)
-            }
         },
 
         async created() {
@@ -208,7 +204,7 @@
             }
 
             p {
-                font-weight: normal;
+                font-weight: 400;
 
                 &:first-child, &:nth-child(3) {
                     font-weight: 600;

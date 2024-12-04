@@ -8,17 +8,8 @@
         </div>
 
         <div class="filters__head-row">
-            <div class="filter-item vpi-type">
-                <label for="vpiTypeSelector">Единицы давления</label>
-                <div class="filter-item__select-container vpi-selector">
-                    <select v-model="vpiType" id="vpiTypeSelector">
-                        <option
-                            :value="item"
-                            :key="item"
-                            v-for="item in vpiOptions">{{ item }}</option>
-                    </select>
-                </div>
-            </div>
+            <vpiTypeSelector/>
+
             <button @click="clearFilters()">Сброс фильтров</button>
         </div>
 
@@ -72,26 +63,30 @@
 
 <script>
 
+import { mapState, mapActions } from "vuex";
+
+import vpiTypeSelector  from "./VpiTypeSelector.vue";
+
 export default {
     name: "ModificationWizardFilters",
+    
+    components: {
+        vpiTypeSelector,
+    },
 
     props: {
         data: {
             type: Object,
             required: true,
         },
-
         loading: {
             type: Boolean,
             default: true,
-        }
+        },
     },
 
     data() {
         return {
-            vpiType: "МПа",
-            vpiOptions: ["МПа", "кПа", "Па", "бар", "атм"],
-
             unnecessaryData: [ "Модификация", "Статус товара", "Особенности серии" ],
 
             focusedItem: null,
@@ -103,7 +98,18 @@ export default {
         }
     },
 
+    computed: {
+        ...mapState({
+            limit: (state) => state.limit,
+            vpiType: (state) => state.vpiType,
+        }),
+    },
+
     methods: {
+        ...mapActions({
+            updateLimit: "updateLimit",
+        }),
+
         getFiltersOptions() {
             let keys = {};
 
@@ -152,13 +158,17 @@ export default {
             for (const key in this.optionsValues) {
                 this.optionsValues[key] = null;
             }
+
             this.selectedValues = {};
+            // сбросить кол-во отображаемых столбцов
+            this.updateLimit();
         },
 
         isValidVpiSelector(heading) {
+            // отображение нужной единицы давления
             if(heading.indexOf("ВПИ, ") === -1) return true;
 
-            return heading === "ВПИ, " + this.vpiType;
+            return heading === this.vpiType.value;
         },
     },
 
@@ -191,12 +201,12 @@ export default {
             },
 
             deep: true,
-        }
+        },
     },  
 }
 </script>
 
-<style scoped lang="scss">
+<style lang="scss">
     .filters {
         &__tabs {
             background: #e0e5e8;
@@ -234,12 +244,6 @@ export default {
                     margin: 0 0 20px 0;
                     width: 100%;
                     height: 30px;
-                }
-
-                @media (hover: hover) and (pointer: fine) {
-                    &:hover {
-                        box-shadow: 5px 5px 15px 0px rgba(0, 0, 0, 0.11);
-                    }
                 }
             }
         }
