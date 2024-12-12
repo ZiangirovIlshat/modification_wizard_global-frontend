@@ -32,15 +32,15 @@
 </template>
 
 <script>
-    import Cart from "./Cart.vue";
+import Cart from "./Cart.vue";
 
-    export default {
-        name: "TopLine",
+export default {
+    name: "TopLine",
 
-        components: {
-            Cart,
-        }
+    components: {
+        Cart,
     }
+}
 </script>
 
 <style lang="scss" scoped>

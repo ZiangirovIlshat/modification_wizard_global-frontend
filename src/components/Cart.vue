@@ -3,7 +3,7 @@
         <a href="https://owen.ru/cart" target="_blank" title="в корзину"></a>
         <div class="cart__icon">
         </div>
-        <span class="cart__count" v-if="cart.data.items && cart.data.items.length > 0">{{ cart.data.items.length }}</span>
+        <span class="cart__count" v-if="cart.data.products.total > 0">{{ cart.data.products.total }}</span>
     </div>
 </template>
 
@@ -61,11 +61,12 @@ export default {
 
         &__count {
             position: absolute;
-            top: 4px;
-            right: 4px;
+            top: 6px;
+            right: 6px;
             background-color: #9f0412;
-            width: 20px;
-            height: 20px;
+            font-size: 10px;
+            width: 16px;
+            height: 16px;
             display: flex;
             justify-content: center;
             align-items: center;

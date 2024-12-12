@@ -14,7 +14,6 @@ const vpiType = {
 
     mutations: {
         SET_VPITYPE_DATA(state, payload) {
-            console.log(payload)
             state.value = payload;
         },
     },

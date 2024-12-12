@@ -4,84 +4,140 @@
             <p v-for="item in 5" :key="item"></p>
         </div>
 
-        <table v-else>
-            <thead>
-                <th v-for="(heading, key) in preparedKeys" :key="key" :class="{'_sorted' : sortingData['keyName'] === key}">
-                    <template
-                        v-if="
-                            heading !== 'Модификация' &&
-                            heading !== 'Аксессуары' &&
-                            heading !== 'Цена с НДС' &&
-                            heading !== 'Заказ'"
-                    >
-                        <button
-                            :class="{
-                                '_desc' : sortingData['keyName'] === key && sortingData['orderBy'] === 'DESC', 
-                                '_sorted' : sortingData['keyName'] === key
-                            }"
-                            @click="updateSortingValues(key)"
-                        ></button>
-                    </template>
-                    {{ heading }}
-                </th>
-            </thead>
-
-            <tbody>
-                <template v-for="(product, index) in data.products">
-                    <tr :class="{'_opened' : accessoriesListOpened === product.key0}" v-if="product && index < limit.value" :key="product.key0">
-                        <td
-                            :class="{'text-center' : key !== 'key0' }"
-                            v-for="(heading, key) in preparedKeys"
-                            :key="key" 
+        <template v-else>
+            <table v-if="width > 1140">
+                <thead>
+                    <th v-for="(heading, key) in preparedKeys" :key="key" :class="{'_sorted' : sortingData['keyName'] === key}">
+                        <template
+                            v-if="
+                                heading !== 'Модификация' &&
+                                heading !== 'Аксессуары' &&
+                                heading !== 'Цена с НДС' &&
+                                heading !== 'Заказ'"
                         >
-                            <template v-if="key === 'key0'">
+                            <button
+                                :class="{
+                                    '_desc' : sortingData['keyName'] === key && sortingData['orderBy'] === 'DESC', 
+                                    '_sorted' : sortingData['keyName'] === key
+                                }"
+                                @click="updateSortingValues(key)"
+                            ></button>
+                        </template>
+                        {{ heading }}
+                    </th>
+                </thead>
+
+                <tbody>
+                    <template v-for="(product, index) in data.products">
+                        <tr :class="{'_opened' : accessoriesListOpened === product.key0}" v-if="product && index < limit.value" :key="product.key0">
+                            <td
+                                :class="{'text-center' : key !== 'key0' }"
+                                v-for="(heading, key) in preparedKeys"
+                                :key="key" 
+                            >
+                                <template v-if="key === 'key0'">
+                                    <a
+                                        class="modification-wizard__modification-link" 
+                                        :href="product['link']" 
+                                        target="_blank"
+                                        title="На страницу товара"
+                                    >{{ product[key] }}</a>
+                                </template>
+
+                                <template v-else-if="key === 'accessories'">
+                                    <button
+                                        class="accessories-btn"
+                                        :class="{'_opened' : accessoriesListOpened === product.key0}"
+                                        @click="openAccessoriesPanel(product.key0)"
+                                    ></button>
+                                </template>
+
+                                <template v-else-if="key === 'buyButton'">
+                                    <CartButton
+                                        v-if="product['product_info'].length !== 0"
+
+                                        :price="product['product_info'][0]['price']"
+                                        :code="product['product_info'][0]['code']"
+                                    />
+
+                                    <span v-else>по запросу</span>                  
+                                </template>
+
+                                <template v-else>
+                                    {{
+                                        isNaN(product[key])
+                                        ? product[key]
+                                        : new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 10 }).format(product[key])
+                                    }}
+                                </template>
+                            </td>
+                        </tr>
+                        <tr class="accessories-tr" v-if="accessoriesListOpened === product.key0" :key="product.key0">
+                            <td :colspan="Object.keys(preparedKeys).length">
+                                <div class="accessories-panel-container">
+                                    <ModificationWizardAccessories 
+                                        :data="product['accessories']"
+                                    ></ModificationWizardAccessories>
+                                </div>
+                            </td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+
+            <div class="mobile-cards" v-else>
+                <template v-for="(product, index) in data.products">
+                    <div class="mobile-cards__item" v-if="product && index < limit.value" :key="product.key0">
+                        
+                        <div v-for="(heading, key) in preparedKeys" :key="key" >
+                            <p class="mobile-cards__heading" v-if="key === 'key0'">
+                                {{ product[key] }}
+                                <br>
                                 <a 
-                                    class="modification-wizard__modification-link" 
-                                    :href="product['link']" 
+                                    :href="product['link']"
                                     target="_blank"
                                     title="На страницу товара"
-                                >{{ product[key] }}</a>
-                            </template>
-
-                            <template v-else-if="key === 'accessories'">
-                                <button
-                                    class="accessories-btn"
-                                    :class="{'_opened' : accessoriesListOpened === product.key0}"
-                                    @click="openAccessoriesPanel(product.key0)"
-                                ></button>
-                            </template>
-
-                            <template v-else-if="key === 'buyButton'">
-                                <CartButton
-                                    v-if="product['product_info'].length !== 0"
-                                    :price="product['product_info'][0]['price']"
-                                    :code="product['product_info'][0]['code']"
-                                />
-
-                                <span v-else>по запросу</span>                  
-                            </template>
-
-                            <template v-else>
-                                {{
-                                    isNaN(product[key])
-                                    ? product[key]
-                                    : new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 10 }).format(product[key])
-                                }}
-                            </template>
-                        </td>
-                    </tr>
-                    <tr class="accessories-tr" v-if="accessoriesListOpened === product.key0" :key="product.key0">
-                        <td :colspan="Object.keys(preparedKeys).length">
-                            <div class="accessories-panel-container">
+                                >Подробнее</a>
+                            </p>
+                            <div 
+                                class="mobile-cards__accessories-btn"
+                                :class="{'_opened' : accessoriesListOpened === product.key0}"
+                                v-else-if="key === 'accessories'"
+                            ><p @click="openAccessoriesPanel(product.key0)">Аксессуары</p>
                                 <ModificationWizardAccessories 
+                                    v-if="accessoriesListOpened === product.key0"
                                     :data="product['accessories']"
                                 ></ModificationWizardAccessories>
                             </div>
-                        </td>
-                    </tr>
+
+                            <template v-else-if="key === 'buyButton'">
+                                <p class="mobile-cards__buy-btn">
+                                    <CartButton
+                                        v-if="product['product_info'].length !== 0"
+
+                                        :price="product['product_info'][0]['price']"
+                                        :code="product['product_info'][0]['code']"
+                                    />
+
+                                    <span v-else>по запросу</span> 
+                                </p>                 
+                            </template>
+                            <p class="mobile-cards__property-row" v-else>
+                                <span class="property">{{ heading }}</span>
+                                <span class="nodes"></span>
+                                <span class="value">
+                                    {{
+                                        isNaN(product[key])
+                                        ? product[key]
+                                        : new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 10 }).format(product[key])
+                                    }}
+                                </span>
+                            </p>
+                        </div>
+                    </div>
                 </template>
-            </tbody>
-        </table>
+            </div>
+        </template>
 
         
     </div>
@@ -122,6 +178,8 @@ export default {
             },
 
             accessoriesListOpened: "",
+
+            width: window.innerWidth,
         }
     },
 
@@ -133,6 +191,10 @@ export default {
     },
 
     methods: {
+        updateWidth() {
+          this.width = window.innerWidth;
+        },
+
         ...mapActions({
             updateLimit: "updateLimit",
         }),
@@ -188,12 +250,19 @@ export default {
 
             this.accessoriesListOpened = productKey;
         },
+
+        handleAddedInCart() {
+
+        },
     },
 
     watch: {
         data: {
             handler(newData) {
-                if(Object.keys(newData).length !== 0) this.getPreparedData();
+                if(Object.keys(newData).length !== 0) {
+                    this.getPreparedData();
+                    this.accessoriesListOpened = "";
+                }
             },
 
             deep: true,
@@ -206,7 +275,11 @@ export default {
 
             deep: true,
         },
-    }
+    },
+
+    created() {
+        window.addEventListener("resize", this.updateWidth);
+    },
 }
 </script>
 
@@ -248,11 +321,75 @@ export default {
         font-size: 12px;
         color: #4c4c4c;
         width: 100%;
-        border: 1px solid #ddd;
+        border: 1px solid #ededed;
     }
 
     thead {
         width: 100%;
+        position: sticky;
+        top: -1px;
+        z-index: 5;
+        background: #fff;
+    }
+
+    th{
+        vertical-align: middle;
+        padding: 8px 8px 14px 8px;
+        background-color: #ededed;
+        font-weight: 600;
+
+        position: relative;
+
+        &::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            bottom: -3px;
+            height: 3px;
+            width: 100%;
+            background-color: #ddd;
+        }
+
+        &:first-child {
+            text-align: left;
+        }
+
+        &._sorted {
+            color: #008f86;
+        }
+
+        button {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0);
+            border: none;
+            cursor: pointer;
+
+            &::after {
+                content: "";
+                bottom: 0px;
+                left: calc(50% - 2px);
+                position: absolute;
+                border: 4px solid transparent; 
+                border-top: 5px solid #4c4c4c;
+            }
+
+            &._desc {
+                &::after {
+                    bottom: 2px;
+                    transform: rotate(180deg);
+                }
+            }
+
+            &._sorted {
+                &::after {
+                    border-top: 6px solid #008f86;
+                }
+            }
+        }
     }
 
     tr {
@@ -278,64 +415,16 @@ export default {
         }
     }
 
-    th{
-        vertical-align: middle;
-        padding: 8px 8px 10px 8px;
-        background-color: #ededed;
-        font-weight: 600;
-
-        position: sticky;
-        top: 0;
-        z-index: 1;
-
-        position: relative;
-
-        &:first-child {
-            text-align: left;
-        }
-
-        &._sorted {
-            color: #008f86;
-        }
-
-        button {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0);
-            border: none;
-            cursor: pointer;
-
-            &::after {
-                content: "";
-                bottom: -1px;
-                position: absolute;
-                border: 4px solid transparent; 
-                border-top: 6px solid #4c4c4c;
-            }
-
-            &._desc {
-                &::after {
-                    bottom: 2px;
-                    transform: rotate(180deg);
-                }
-            }
-
-            &._sorted {
-                &::after {
-                    border-top: 6px solid #008f86;
-                }
-            }
-        }
-    }
-
     td {
         padding: 8px;
 
         &:first-child {
+            width: 200px;
             font-weight: 600;
+        }
+
+        &:nth-child(5) {
+            width: 220px;
         }
 
         &.text-center {
@@ -390,4 +479,77 @@ export default {
             }
         }
     }
+
+
+    .mobile-cards {
+        margin: 0 0 20px 0;
+        font-size: 12px;
+
+        &__item {
+            margin: 0 0 20px 0;
+            padding: 0 0 3px 0;
+            border-bottom: 1px solid #b8b8b8;
+        }
+
+        &__heading {
+            font-weight: 600;
+            font-size: 14px;
+            margin: 0 0 10px 0;
+
+            a {
+                font-size: 12px;
+                color: #008f86;
+            }
+        }
+
+        &__accessories-btn {
+            margin: 0 0 10px 0;
+            font-weight: 600;
+            position: relative;
+
+            &::after {
+                content: "";
+                position: absolute;
+                pointer-events: none;
+                left: 75px;
+                top: 3px;
+                border: 6px solid transparent;
+                border-top: 8px solid #4c4c4c;
+                transition: left 0.2s;
+            }
+
+            &._opened {
+                p {
+                    margin: 0 0 10px 0;
+                }
+                &::after {
+                    transform: rotate(180deg);
+                    top: -3px;
+                }
+            }
+        }
+
+        &__buy-btn {
+            margin: 10px 0 10px 0;
+        }
+
+        &__property-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 0 0 3px 0;
+        }
+    }
+    .property {
+        color: #646464;
+    }
+    .nodes {
+        flex: 1;
+        margin: 0 5px;
+        border-bottom: 1px dashed #b8b8b8;
+    }
+    .value {
+        font-weight: 600;
+        text-align: right;
+    }
+
 </style>

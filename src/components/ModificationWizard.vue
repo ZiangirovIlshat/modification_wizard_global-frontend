@@ -10,6 +10,7 @@
                     @update:selectedValues="handleSelectedValues"
                 />
             </div>
+
             <div class="modification-wizard__table">
                 <ModificationWizardTable
                     :data="products.data"
@@ -74,7 +75,6 @@ export default {
         },
 
         handleClearFilters() {
-            console.log(this.filtersIsEmpty)
             this.filtersIsEmpty = true;
         },
 
@@ -140,4 +140,3 @@ export default {
         }
     }
 </style>
-  

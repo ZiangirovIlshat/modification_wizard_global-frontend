@@ -1,9 +1,9 @@
 <template>
     <div class="cart-btn">
         <p class="cart-btn__preloader" v-if="loading">Загрузка...</p>
-        <p class="cart-btn__error" v-else-if="error">{{ cart.error }}</p>
+        <p class="cart-btn__error" v-else-if="error" v-html="error"></p>
         <div class="cart-btn__row" v-else>
-            <div class="cart-btn__price" :class="{'_in-cart' : count > 0}">
+            <div class="cart-btn__price">
                 {{
                     parseFloat(price).toLocaleString(
                         "ru-RU",
@@ -20,10 +20,13 @@
                 <button
                     class="cart-btn__bue-btn"
                     @click="callAddToCart()"
-                    v-if="!isInCart"
+                    v-if="!cart.data.indexes[code]"
                 >В заказ</button>
 
-                <p class="cart-btn__is-in-cart" v-else>В корзине</p>
+                <p class="cart-btn__is-in-cart" v-else>
+                    <span class="cart-btn__count">{{ cart.data.indexes[code] }}</span>
+                    В корзине
+                </p>
             </div>
         </div>
     </div>
@@ -36,25 +39,20 @@ export default {
     name: "CartButton",
 
     props: {
-        code: {
-            type: String,
-            required: true,
-        },
-
         price: {
             type: String,
-            required: true,
+            required:true,
+        },
+        code: {
+            type: String,
+            required:true,
         },
     },
 
     data() {
         return {
-            loading: "",
+            loading: false,
             error: "",
-
-            isInCart: false,
-
-            count: 1,
         }
     },
 
@@ -67,64 +65,23 @@ export default {
     methods: {
         ...mapActions({
             addToCart: "cart/addToCart",
-            setCount: "cart/setCount",
         }),
 
         async callAddToCart() {
-            try {
-                this.loading = true;
+            this.loading = true;
 
-                await this.addToCart({ code: this.code, count: this.count });
-                this.checkInCart();
-            } catch (error) {
-                this.error = this.cart.error;
-            } finally {
-                this.loading = false;
-            }
+            await this.addToCart({ code: this.code });
+
+            this.loading = false;
+
+            if(this.cart.error) this.error = this.cart.error;
         },
-
-        async callSetCount() {
-            try {
-                this.loading = true;
-
-                await this.setCount({ code: this.code, count: this.count });
-            } catch (error) {
-                this.error = this.cart.error;
-            } finally {
-                this.loading = false;
-            }
-        },
-
-        checkInCart() {
-            const data = this.cart.data;
-
-            if(data.total === 0) {
-                this.isInCart = false;
-                return;
-            }
-
-            for (let i = 0; i < data.items.length; i++) {
-                const el = data.items[i];
-                
-                if(el.id == this.code) {
-                    this.isInCart = true;
-                    return;
-                }
-            }
-
-            this.isInCart = false;
-        }
     },
 }
 </script>
 
 <style lang="scss" scoped>
 .cart-btn {
-    width: 150px;
-
-    &._in-cart {
-
-    }
 
     &__preloader {
         text-align: center;
@@ -139,6 +96,7 @@ export default {
 
     &__row {
         display: flex;
+        flex-wrap: wrap;
         align-items: center;
         justify-content: right;
         gap: 5px;
@@ -148,6 +106,7 @@ export default {
 
     &__btns {
         display: flex;
+        align-items: center;
     }
 
     &__bue-btn {
@@ -168,11 +127,27 @@ export default {
     }
 
     &__is-in-cart {
-        width: 65px;
+        width: 70px;
         text-align: center;
         font-weight: normal;
         padding: 2px;
         border: 1px solid #4c4c4c;
+        position: relative;
+    }
+
+    &__count {
+        position: absolute;
+        top: -6px;
+        right: -6px;
+        background: #4c4c4c;
+        color: #fff;
+        font-size: 10px;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
 
     &__get-count-btns {
@@ -203,10 +178,7 @@ export default {
     &__price {
         line-height: 1;
         padding: 0 3px;
-
-        &._in-cart {
-            font-weight: 600;
-        }
+        font-weight: 600;
     }
 }
 

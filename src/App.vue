@@ -17,6 +17,17 @@
 </script>
 
 <style lang="scss">
+
+body::-webkit-scrollbar {
+  width: 8px;
+}
+body::-webkit-scrollbar-track {
+  background: #d6d6d6;
+}
+body::-webkit-scrollbar-thumb {
+  background-color: #343536;
+}
+
 #app {
   color: #343536;
   font-size: 14px;
