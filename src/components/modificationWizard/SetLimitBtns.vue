@@ -13,10 +13,10 @@
             >Показать все ({{ rowsCount - limit.value }})</button>
         </div>
 
-        <button 
+        <button
             class="set-limit-btns__close-btn"
             @click="updateLimit()"
-            v-if="limit.value > 10 && rowsCount !== 10"
+            v-if="limit.value > 10 && rowsCount >= 10"
         >Свернуть</button>
     </div>
 </template>

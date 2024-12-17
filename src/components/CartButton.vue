@@ -26,6 +26,7 @@
                 <p class="cart-btn__is-in-cart" v-else>
                     <span class="cart-btn__count">{{ cart.data.indexes[code] }}</span>
                     В корзине
+                    <a href="https://owen.ru/cart" target="_blank" title="Перейти в корзину"></a>
                 </p>
             </div>
         </div>
@@ -133,6 +134,25 @@ export default {
         padding: 2px;
         border: 1px solid #4c4c4c;
         position: relative;
+
+        a {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+
+        @media (hover: hover) and (pointer: fine) {
+            &:hover {
+                border: 1px solid #008f86;
+                color: #008f86;
+
+                .cart-btn__count {
+                    background: #008f86;
+                }
+            }
+        }
     }
 
     &__count {
