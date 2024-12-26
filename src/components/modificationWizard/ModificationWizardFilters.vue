@@ -20,42 +20,93 @@
                 :key="item.key"
                 v-for="(item, index) in filtersOptions"
             >
-                <label :for="item.key">
-                    {{ item.heading  }}
-                </label>
 
-                <div 
-                    class="filter-item__select-container"
-                    :class="{'_focused' : focusedItem === index}"
-                    v-if="!optionsValues[item.key]"
-                >
-                    <select
-                        :class="{'_loading' : loading}"
-                        :id="item.key"
+                <template v-if="item.values.length < 10">
+                    <label :for="item.key">
+                        {{ item.heading  }}
+                    </label>
 
-                        :disabled="loading"
-
-                        @focus="focusedItem = index"
-                        @blur="focusedItem = null"
-
-                        v-model="optionsValues[item.key]"
+                    <div
+                        class="filter-item__select-container"
+                        :class="{'_focused' : focusedItem === index}"
+                        v-if="!optionsValues[item.key]"
                     >
-                        <option :value="null">Выберите</option>
-                        <option 
-                            :value="option"
-                            :key="option"
-                            v-for="option in item.values"
-                        >
-                            {{
-                                isNaN(option)
-                                ? option
-                                : new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 10 }).format(option)
-                            }}
-                        </option>
-                    </select>
-                </div>
+                        <select
+                            :class="{'_loading' : loading}"
+                            :id="item.key"
 
-                <div class="filter-item__selected-value" v-else>{{ optionsValues[item.key] }}</div>
+                            :disabled="loading"
+
+                            @focus="focusedItem = index"
+                            @blur="focusedItem = null"
+
+                            v-model="optionsValues[item.key]"
+                        >
+                            <option :value="null">Выберите</option>
+                            <option 
+                                :value="option"
+                                :key="option"
+                                v-for="option in item.values"
+                            >
+                                {{
+                                    isNaN(option)
+                                    ? option
+                                    : new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 10 }).format(option)
+                                }}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="filter-item__selected-value" v-else>{{ optionsValues[item.key] }}</div>
+                </template>
+
+                <template v-else>
+                    <label :for="item.key">
+                        {{ item.heading  }}
+                    </label>
+
+                    <div
+                        class="filter-item__select-container"
+                        :class="{'_focused' : focusedItem === index}"
+                        v-if="!optionsValues[item.key]"
+                    >
+                        <input
+                            class="filter-item__search-input"
+                            :class="{'_loading' : loading}"
+                            type="text"
+                            placeholder="Выберите"
+
+                            :disabled="loading"
+
+                            @focus="openedInput = item.key"
+                            @blur="handleBlur"
+
+                            v-model="searchSubstrs[item.key]"
+                        >
+                        <div class="filter-item__options" v-if="openedInput === item.key">
+                            <p 
+                                v-for="(option, index) in getFilteredOptionsInInput(searchSubstrs[item.key], item.values)"
+                                v-show="index < oprionsLimit"
+                                :key="option"
+                                @click="optionsValues[item.key] = option"
+                            >
+                                {{
+                                    isNaN(option)
+                                    ? option
+                                    : new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 10 }).format(option)
+                                }}
+                            </p>
+                            <p
+                                class="filter-item__show-more-btn"
+                                @mousedown.prevent="showMoreHints(getFilteredOptionsInInput(searchSubstrs[item.key], item.values).length)"
+                                v-if="oprionsLimit < getFilteredOptionsInInput(searchSubstrs[item.key], item.values).length &&
+                                getFilteredOptionsInInput(searchSubstrs[item.key], item.values).length > 7"
+                            >Показать все</p>
+                        </div>
+                    </div>
+
+                    <div class="filter-item__selected-value" v-else>{{ optionsValues[item.key] }}</div>
+                </template>
+
             </div>
         </div>
     </div>
@@ -95,6 +146,10 @@ export default {
 
             optionsValues: {}, // значения фильтров
             selectedValues: {}, // значения фильтров не равные null
+
+            searchSubstrs: {}, // поиск для input-ов
+            oprionsLimit: 5,
+            openedInput: null,
         }
     },
 
@@ -125,16 +180,44 @@ export default {
 
             this.filtersOptions = [];
 
-            for(let header in keys) {
+            for (let header in keys) {
                 const el = keys[header];
 
-                if(el.values.length === 0 || !el.values[0] || this.unnecessaryData.includes(header)) continue;
+                if (el.values.length === 0  || !el.values[0]  || this.unnecessaryData.includes(header)) continue;
+
+                let arrToSort = [];
+                let hasNumbers = false;
+                let hasStrings = false;
+
+                el.values.forEach(value => {
+                    const isNumberString = /^[+-]?\d+(\.\d+)?$/.test(value.replace(",", "."));
+
+                    console.log(isNumberString)
+                    if (isNumberString) {
+                        const numValue = parseFloat(value);
+                        arrToSort.push(numValue);
+                        hasNumbers = true;
+                    } else {
+                        arrToSort.push(value);
+                        hasStrings = true;
+                    }
+                });
+
+                arrToSort.sort((a, b) => {
+                    if (typeof a === "number" && typeof b === "number") {
+                        return a - b;
+                    }
+
+                    return String(a).localeCompare(String(b));
+                });
+
+                const sortedValues = arrToSort.map(value => value.toString());
 
                 this.filtersOptions.push({
-                    "key" : el.key,
-                    "heading" : header,
-                    "values" : el.values.sort(),
-                })
+                    "key": el.key,
+                    "heading": header,
+                    "values": sortedValues,
+                });
             }
 
             if(Object.keys(this.optionsValues).length === 0) {
@@ -169,6 +252,36 @@ export default {
             if(heading.indexOf("ВПИ, ") === -1) return true;
 
             return heading === this.vpiType.value;
+        },
+
+        // когда значений больше 10
+        getFilteredOptionsInInput(subStr, values) {
+            let options = [];
+
+            if(!subStr) {
+                options = values;
+                return options;
+            }
+
+            values.forEach(el => {
+                if(el.indexOf(subStr) !== -1) {
+                    options.push(el)
+                }
+            });
+
+            return options;
+        },
+
+        handleBlur() {
+            setTimeout(() => {
+                this.searchSubstrs = {};
+                this.openedInput = null;
+                this.oprionsLimit = 5;
+            }, 200);
+        },
+
+        showMoreHints(length) {
+            this.oprionsLimit = length;
         },
     },
 
@@ -307,7 +420,7 @@ export default {
         }
 
 
-        select {
+        select, &__search-input {
             width: 250px;
             height: 25px;
             background: #008f86;
@@ -405,6 +518,49 @@ export default {
                 max-width: 100%;
                 min-width: 100%;
             }
+        }
+
+        &__search-input {
+            &::placeholder {color: #fff;}
+            &::-webkit-input-placeholder {color: #fff;}
+            &::-moz-placeholder {color: #fff;}
+            &::-ms-input-placeholder {color: #fff;}
+            &:-ms-input-placeholder {color: #fff;}
+        }
+
+        &__options {
+            position: absolute;
+            width: 100%;
+            z-index: 10;
+            background: #fff;
+            border: 1px solid;
+            max-height: 300px;
+            overflow-y: scroll;
+
+            scrollbar-width: thin;
+
+            &::-webkit-scrollbar {
+                width: 5px;
+            }
+            &::-webkit-scrollbar-track {
+                background: #fff;
+            }
+            &::-webkit-scrollbar-thumb {
+                background-color: #343536;
+            }
+
+            p {
+                padding: 3px 5px;
+
+                &:hover {
+                    background: #e0e5e8;
+                }
+            }
+        }
+
+        &__show-more-btn {
+            color: #008f86;
+            font-weight: 600;
         }
     }
 

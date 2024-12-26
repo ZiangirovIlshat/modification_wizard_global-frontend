@@ -18,14 +18,10 @@
 
 <style lang="scss">
 
-body::-webkit-scrollbar {
-  width: 8px;
-}
-body::-webkit-scrollbar-track {
-  background: #d6d6d6;
-}
-body::-webkit-scrollbar-thumb {
-  background-color: #343536;
+html {
+  scrollbar-width: thin;
+
+  &::-webkit-scrollbar { width: 8px; }
 }
 
 #app {
@@ -35,7 +31,7 @@ body::-webkit-scrollbar-thumb {
   line-height: 1.2;
 }
 .main-container {
-  max-width: 1600px;
+  max-width: 1800px;
   padding: 10px;
   margin: 0 auto;
 }

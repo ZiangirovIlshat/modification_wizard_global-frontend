@@ -12,6 +12,7 @@
                             v-if="
                                 heading !== 'Модификация' &&
                                 heading !== 'Аксессуары' &&
+                                heading !== 'Особенности серии' &&
                                 heading !== 'Цена с НДС' &&
                                 heading !== 'Заказ'"
                         >
@@ -169,7 +170,7 @@ export default {
 
     data() {
         return {
-            unnecessaryData: [ "Статус товара", "Особенности серии", "price", "code" ],
+            unnecessaryData: [ "Статус товара", "price", "code" ],
 
             preparedKeys: {},
             sortingData: {
@@ -250,10 +251,6 @@ export default {
 
             this.accessoriesListOpened = productKey;
         },
-
-        handleAddedInCart() {
-
-        },
     },
 
     watch: {
@@ -322,6 +319,7 @@ export default {
         color: #4c4c4c;
         width: 100%;
         border: 1px solid #ededed;
+        table-layout: auto;
     }
 
     thead {
@@ -417,16 +415,18 @@ export default {
 
     td {
         padding: 8px;
+        align-content: center;
 
         &:first-child {
             width: 200px;
-            font-weight: 600;
         }
-
-        &:nth-child(5) {
-            width: 220px;
+        &:nth-child(3), &:nth-child(8) {
+            width: 200px;
         }
-
+        &:last-child {
+            width: 180px;
+        }
+ 
         &.text-center {
             text-align: center;
         }
